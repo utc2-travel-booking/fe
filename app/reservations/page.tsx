@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { fetchReservations } from '@/utils/action';
+import Stats from '@/components/admin/Stats';
 
 async function ReservationsPage() {
   const reservations = await fetchReservations();
@@ -67,7 +68,9 @@ async function ReservationsPage() {
           })}
         </TableBody>
       </Table>
+      <Stats />
     </div>
+    
   );
 }
 export default ReservationsPage;

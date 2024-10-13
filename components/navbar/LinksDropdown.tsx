@@ -19,6 +19,7 @@ function LinksDropdown() {
   console.log("userid :", userId);
 
   const isAdminUser = userId === process.env.ADMIN_USER_ID;
+  
   if (isAdminUser) {
     console.log("is Admin");
   } else {
