@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { supabase, uploadImage } from './supabase';
-import { createReviewSchema, imageSchema, profileSchema, propertySchema, validateWithZodSchema } from './schemas';
+import { createReviewSchema, imageSchema, profileSchema, propertySchema, searchAI, validateWithZodSchema } from './schemas';
 import { Message } from './types';
 import { calculateTotals } from './calculateTotals';
 import { formatDate } from './format';
@@ -725,4 +725,33 @@ export const fetchReservationStats = async () => {
     nights: totals._sum.totalNights || 0,
     amount: totals._sum.orderTotal || 0,
   };
+};
+
+
+ export const gennerateAI = async (
+  prevState: any,
+  formData: FormData
+): Promise<{ message: string }> => {
+  
+  try {
+    const rawData = Object.fromEntries(formData);
+  
+    const file = formData.get('image') as File;
+    console.log(
+      "data",rawData);
+    const validatedFields = validateWithZodSchema(searchAI, rawData);
+    const validatedFile = validateWithZodSchema(imageSchema, { image: file });
+    console.log("file",validatedFile);
+    console.log(validatedFields);
+    
+    if (!validatedFields) {
+      throw new Error();
+    }
+
+   
+    
+    return { message: 'Waiting generate AI' };
+  } catch (error) {
+    return renderError(error);
+  }
 };

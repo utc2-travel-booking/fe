@@ -13,4 +13,5 @@ type NavLink = {
     { href: '/rentals', label: 'my rentals' },
     { href: '/profile ', label: 'profile' },
     { href: '/admin ', label: 'admin' },
+    { href: '/ai ', label: 'AI' },
   ];
