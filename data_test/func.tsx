@@ -6,11 +6,7 @@ export const testLogin = async () => {
 
     let UserData = []
     try {
-        let data = JSON.stringify({
-            'identifier': '6251071040@st.utc2.edu.vn',
-            'password': 'Huy0835450077123123',
-            'strategy': 'password' 
-          });
+      
           
           let config = {
             method: 'post',
@@ -19,9 +15,9 @@ export const testLogin = async () => {
             headers: { 
               'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': '__cf_bm=jYfiKWdnDdTcFmYxeiuhqdBug4rV4k_GOYT4sq94Pa4-1731087707-1.0.1.1-loBCrAIj0.e89i4.jOJtODbUqlcUZFlMgJvzSJpNE.Ul40S6_fH6OxZP7w6hXi0Q8CVcbiagUywTlfXvQiSdJg; _cfuvid=uniJ2.6aXWFh_x6TTshjgRoqymf1yNAwdGKVzSo8pmM-1731087707690-0.0.1.1-604800000'
             },
-            data : data
+            data : ''
           };
-          
+        
           await axios.request(config)
         
     }catch (error:any) {
