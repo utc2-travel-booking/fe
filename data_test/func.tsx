@@ -25,7 +25,7 @@ export const testLogin = async () => {
       
       
     }finally{
-        console.log('User Data', UserData[0].user.email_addresses[0].email_address);
+        console.log('User id', UserData[0].user.id);
         
     }
     return UserData[0].user.id;
