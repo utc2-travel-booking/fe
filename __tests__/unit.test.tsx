@@ -46,7 +46,7 @@ describe('Render Test', () => {
   });
 
 
-  it('test connect clerk and login user', async () => {
+  it('ttest login user', async () => {
 
     const result = await testLogin();
     expect(typeof result).toBe('string');
