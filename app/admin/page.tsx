@@ -13,6 +13,7 @@ async function AdminPage() {
       <Suspense fallback={<ChartsLoadingContainer />}>
         <ChartsContainer />
       </Suspense>
+  
     </>
   );
 }

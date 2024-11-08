@@ -102,12 +102,14 @@ export const updateProfileAction = async (
       throw new Error();
     }
 
-    await db.profile.update({
-      where: {
-        clerkId: user.id,
-      },
-      data: validatedFields,
-    });
+    if (db) {
+      await db?.profile?.update({
+        where: {
+          clerkId: user.id,
+        },
+        data: validatedFields,
+      });
+    }
     revalidatePath('/profile');
     return { message: 'Profile updated successfully' };
   } catch (error) {
