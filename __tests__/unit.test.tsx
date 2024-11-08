@@ -2,8 +2,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import HelloWorld from '../data_test/render';
-import image from "../data_test/00-Linux-1200x900.png";
 import { uploadImageLocal, supabase } from "@/utils/supabase";
+import { testLogin } from '../data_test/func';
 const fs = require('fs');
 const path = require('path');
 
@@ -24,7 +24,7 @@ describe('Render Test', () => {
   
   
 
-  it('test connect supabase upload image ', async () => {
+  it('test connect supabase and upload file ', async () => {
 
     const pathFIle = 'data_test/00-Linux-1200x900.png';
     const imageBuffer = fs.readFileSync(pathFIle);
@@ -42,6 +42,16 @@ describe('Render Test', () => {
     const result = await uploadImageLocal(imageBuffer, newName);
   
     expect(typeof result).toBe('string');
+   
+  });
+
+
+  it('test connect clerk and login user', async () => {
+
+    const result = await testLogin();
+    expect(typeof result).toBe('string');
+    expect(result.startsWith('user_')).toBe(true);
+
    
   });
 
