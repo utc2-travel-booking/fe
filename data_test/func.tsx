@@ -8,7 +8,7 @@ export const testLogin = async () => {
     try {
         let data = JSON.stringify({
             'identifier': '6251071040@st.utc2.edu.vn',
-            'password': 'Huy0835450077',
+            'password': 'Huy0835450077123123',
             'strategy': 'password' 
           });
           
@@ -29,7 +29,7 @@ export const testLogin = async () => {
       
       
     }finally{
-        console.log('User Data', UserData[0].user.id);
+        console.log('User Data', UserData[0].user.email_addresses[0].email_address);
         
     }
     return UserData[0].user.id;
