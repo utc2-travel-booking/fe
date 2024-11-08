@@ -8,6 +8,7 @@ export const supabase = createClient(
   process.env.SUPABASE_KEY as string
 );
 
+
 export const uploadImage = async (image: File) => {
   const timestamp = Date.now();
   // const newName = `/users/${timestamp}-${image.name}`;
@@ -27,8 +28,17 @@ export const uploadImage = async (image: File) => {
 };
 
 
-export const uploadImageTest = async () => {
-  const reponse = await fetch(image.src);
-  const blob = await reponse.blob();
-  const file = new File([blob], 'image.png', { type: 'image/png' });
+export const uploadImageLocal = async (image: Buffer, nameImage: string) => {
+
+
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(nameImage, image, {
+      cacheControl: '3600',
+    });
+
+
+    
+  console.log(supabase.storage.from(bucket).getPublicUrl(nameImage).data.publicUrl);
+  return supabase.storage.from(bucket).getPublicUrl(nameImage).data.publicUrl;
 };

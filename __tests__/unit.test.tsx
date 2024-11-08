@@ -3,36 +3,11 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import HelloWorld from '../data_test/render';
 import image from "../data_test/00-Linux-1200x900.png";
-import { uploadImage, supabase , uploadImageTest} from "@/utils/supabase";
+import { uploadImageLocal, supabase } from "@/utils/supabase";
+const fs = require('fs');
+const path = require('path');
 
 
-
-
-
-
-
-
-
-
-
-
-// jest.mock('@supabase/supabase-js', () => {
-//   return {
-//     createClient: jest.fn(() => ({
-//       storage: {
-//         from: jest.fn(() => ({
-//           upload: jest.fn(() => ({
-//             data: { Key: 'mocked-key' },
-//             error: null,
-//           })),
-//           getPublicUrl: jest.fn(() => ({
-//             data: { publicUrl: 'http://example.com/mocked-key' },
-//           })),
-//         })),
-//       },
-//     })),
-//   };
-// });
 
 
 describe('Render Test', () => {
@@ -50,9 +25,22 @@ describe('Render Test', () => {
   
 
   it('test connect supabase upload image ', async () => {
- 
 
-    const result = await uploadImageTest();
+    const pathFIle = 'data_test/00-Linux-1200x900.png';
+    const imageBuffer = fs.readFileSync(pathFIle);
+    const fileName = path.basename(pathFIle);
+    const timestamp = Date.now();
+    const newName = `${timestamp}-${fileName}`;
+    
+    const { data, error } = await supabase.storage
+    .from('data_bookingtravel')
+    .upload(newName, imageBuffer, {
+      cacheControl: '3600',
+    });
+
+
+    const result = await uploadImageLocal(imageBuffer, newName);
+  
     expect(typeof result).toBe('string');
    
   });
