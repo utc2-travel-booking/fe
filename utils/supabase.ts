@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import image from '../data_test/00-Linux-1200x900.png'
+import fs from 'fs';
+import path from 'path';
 const bucket = 'data_bookingtravel';
 
 // Create a single supabase client for interacting with your database
@@ -28,17 +29,26 @@ export const uploadImage = async (image: File) => {
 };
 
 
-export const uploadImageLocal = async (image: Buffer, nameImage: string) => {
+export const uploadImageLocal = async (pathImage: string) => {
+
+  try {
+    const imageBuffer = fs.readFileSync(pathImage);
+    const fileName = path.basename(pathImage);
+    const timestamp = Date.now();
+    const newName = `${timestamp}-${fileName}`;
 
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(nameImage, image, {
-      cacheControl: '3600',
-    });
+    await supabase.storage
+      .from(bucket)
+      .upload(newName, imageBuffer, {
+        cacheControl: '3600',
+      });
 
-
+    return supabase.storage.from(bucket).getPublicUrl(newName).data.publicUrl;
     
-  console.log(supabase.storage.from(bucket).getPublicUrl(nameImage).data.publicUrl);
-  return supabase.storage.from(bucket).getPublicUrl(nameImage).data.publicUrl;
+  } catch (error) { 
+    return 'error';
+  }
+
+
 };
