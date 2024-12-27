@@ -1,19 +1,27 @@
-'use server';
-import db from './db';
-import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+"use server";
+import db from "./db";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
-import { supabase, uploadImage } from './supabase';
-import { createReviewSchema, imageSchema, profileSchema, propertySchema, searchAI, validateWithZodSchema } from './schemas';
-import { Message } from './types';
-import { calculateTotals } from './calculateTotals';
-import { formatDate } from './format';
+import { supabase, uploadImage } from "./supabase";
+import {
+  createReviewSchema,
+  imageSchema,
+  profileSchema,
+  propertySchema,
+  textSearchAI,
+  urlImageSearchAI,
+  validateWithZodSchema,
+} from "./schemas";
+import { Message } from "./types";
+import { calculateTotals } from "./calculateTotals";
+import { formatDate } from "./format";
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
   return {
-    message: error instanceof Error ? error.message : 'An error occurred',
+    message: error instanceof Error ? error.message : "An error occurred",
   };
 };
 
@@ -23,21 +31,19 @@ export const createProfileAction = async (
 ) => {
   try {
     const user = await currentUser();
-    if (!user) throw new Error('Please login to create a profile');
+    if (!user) throw new Error("Please login to create a profile");
 
     const rawData = Object.fromEntries(formData);
-    console.log("rawdata",rawData);
 
-    
     const validatedFields = validateWithZodSchema(profileSchema, rawData);
-    
-    console.log("valider",validatedFields);
+
+    console.log("valider", validatedFields);
 
     await db.profile.create({
       data: {
         clerkId: user.id,
         email: user.emailAddresses[0].emailAddress,
-        profileImage: user.imageUrl ?? '',
+        profileImage: user.imageUrl ?? "",
         ...validatedFields,
       },
     });
@@ -48,17 +54,17 @@ export const createProfileAction = async (
     });
   } catch (error) {
     return {
-      message: error instanceof Error ? error.message : 'An error occurred',
+      message: error instanceof Error ? error.message : "An error occurred",
     };
   }
-  redirect('/');
+  redirect("/");
 };
 const getAuthUser = async () => {
   const user = await currentUser();
   if (!user) {
-    throw new Error('You must be logged in to access this route');
+    throw new Error("You must be logged in to access this route");
   }
-  if (!user.privateMetadata.hasProfile) redirect('/profile/create');
+  if (!user.privateMetadata.hasProfile) redirect("/profile/create");
   return user;
 };
 
@@ -85,7 +91,7 @@ export const fetchProfile = async () => {
       clerkId: user.id,
     },
   });
-  if (!profile) return redirect('/profile/create');
+  if (!profile) return redirect("/profile/create");
   return profile;
 };
 
@@ -96,9 +102,8 @@ export const updateProfileAction = async (
   const user = await getAuthUser();
   try {
     const rawData = Object.fromEntries(formData);
-  const validatedFields = validateWithZodSchema(profileSchema, rawData);
+    const validatedFields = validateWithZodSchema(profileSchema, rawData);
     if (!validatedFields) {
-      
       throw new Error();
     }
 
@@ -110,8 +115,8 @@ export const updateProfileAction = async (
         data: validatedFields,
       });
     }
-    revalidatePath('/profile');
-    return { message: 'Profile updated successfully' };
+    revalidatePath("/profile");
+    return { message: "Profile updated successfully" };
   } catch (error) {
     return renderError(error);
   }
@@ -123,7 +128,7 @@ export const updateProfileImageAction = async (
 ) => {
   const user = await getAuthUser();
   try {
-    const image = formData.get('image') as File;
+    const image = formData.get("image") as File;
     const validatedFields = validateWithZodSchema(imageSchema, { image });
     const fullPath = await uploadImage(validatedFields.image);
 
@@ -135,8 +140,8 @@ export const updateProfileImageAction = async (
         profileImage: fullPath,
       },
     });
-    revalidatePath('/profile');
-    return { message: 'Profile image updated successfully' };
+    revalidatePath("/profile");
+    return { message: "Profile image updated successfully" };
   } catch (error) {
     return renderError(error);
   }
@@ -148,14 +153,11 @@ export const createPropertyAction = async (
   const user = await getAuthUser();
   try {
     const rawData = Object.fromEntries(formData);
-    const file = formData.get('image') as File;
-    console.log(
-      "data",rawData);
-    
+    const file = formData.get("image") as File;
+
     const validatedFields = validateWithZodSchema(propertySchema, rawData);
     const validatedFile = validateWithZodSchema(imageSchema, { image: file });
-    console.log("foe",validatedFields);
-    
+
     const fullPath = await uploadImage(validatedFile.image);
 
     await db.property.create({
@@ -168,12 +170,11 @@ export const createPropertyAction = async (
   } catch (error) {
     return renderError(error);
   }
-  redirect('/');
+  redirect("/");
 };
 
-
 export const fetchProperties = async ({
-  search = '',
+  search = "",
   category,
 }: {
   search?: string;
@@ -183,8 +184,8 @@ export const fetchProperties = async ({
     where: {
       category,
       OR: [
-        { name: { contains: search, mode: 'insensitive' } },
-        { tagline: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: "insensitive" } },
+        { tagline: { contains: search, mode: "insensitive" } },
       ],
     },
     select: {
@@ -217,7 +218,6 @@ export const fetchFavoriteId = async ({
   return favorite?.id || null;
 };
 
-
 export const toggleFavoriteAction = async (prevState: {
   propertyId: string;
   favoriteId: string | null;
@@ -241,7 +241,7 @@ export const toggleFavoriteAction = async (prevState: {
       });
     }
     revalidatePath(pathname);
-    return { message: favoriteId ? 'Removed from Faves' : 'Added to Faves' };
+    return { message: favoriteId ? "Removed from Faves" : "Added to Faves" };
   } catch (error) {
     return renderError(error);
   }
@@ -268,7 +268,6 @@ export const fetchFavorites = async () => {
   });
   return favorites.map((favorite) => favorite.property);
 };
-
 
 export async function fetchPropertyRating(propertyId: string) {
   const result = await db.review.groupBy({
@@ -309,7 +308,6 @@ export const deleteReviewAction = async (prevState: { reviewId: string }) => {
     return renderError(error);
   }
 };
-
 
 export async function createReviewAction(prevState: any, formData: FormData) {
   const user = await getAuthUser();
@@ -386,8 +384,6 @@ export const findExistingReview = async (
   });
 };
 
-
-
 export const fetchPropertyDetails = (id: string) => {
   return db.property.findUnique({
     where: {
@@ -425,7 +421,7 @@ export const createBookingAction = async (prevState: {
     select: { price: true },
   });
   if (!property) {
-    return { message: 'Property not found' };
+    return { message: "Property not found" };
   }
   const { orderTotal, totalNights } = calculateTotals({
     checkIn,
@@ -450,8 +446,6 @@ export const createBookingAction = async (prevState: {
   }
   redirect(`/checkout?bookingId=${bookingId}`);
 };
-
-
 
 export async function deleteBookingAction(prevState: { bookingId: string }) {
   const { bookingId } = prevState;
@@ -573,7 +567,7 @@ export const updatePropertyAction = async (
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
-  const propertyId = formData.get('id') as string;
+  const propertyId = formData.get("id") as string;
 
   try {
     const rawData = Object.fromEntries(formData);
@@ -589,7 +583,7 @@ export const updatePropertyAction = async (
     });
 
     revalidatePath(`/rentals/${propertyId}/edit`);
-    return { message: 'Update Successful' };
+    return { message: "Update Successful" };
   } catch (error) {
     return renderError(error);
   }
@@ -600,10 +594,10 @@ export const updatePropertyImageAction = async (
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
-  const propertyId = formData.get('id') as string;
+  const propertyId = formData.get("id") as string;
 
   try {
-    const image = formData.get('image') as File;
+    const image = formData.get("image") as File;
     const validatedFields = validateWithZodSchema(imageSchema, { image });
     const fullPath = await uploadImage(validatedFields.image);
 
@@ -617,7 +611,7 @@ export const updatePropertyImageAction = async (
       },
     });
     revalidatePath(`/rentals/${propertyId}/edit`);
-    return { message: 'Property Image Updated Successful' };
+    return { message: "Property Image Updated Successful" };
   } catch (error) {
     return renderError(error);
   }
@@ -634,7 +628,7 @@ export const fetchReservations = async () => {
     },
 
     orderBy: {
-      createdAt: 'desc', // or 'asc' for ascending order
+      createdAt: "desc", // or 'asc' for ascending order
     },
 
     include: {
@@ -651,10 +645,9 @@ export const fetchReservations = async () => {
   return reservations;
 };
 
-
 const getAdminUser = async () => {
   const user = await getAuthUser();
-  if (user.id !== process.env.ADMIN_USER_ID) redirect('/');
+  if (user.id !== process.env.ADMIN_USER_ID) redirect("/");
   return user;
 };
 
@@ -685,7 +678,7 @@ export const fetchChartsData = async () => {
       },
     },
     orderBy: {
-      createdAt: 'asc',
+      createdAt: "asc",
     },
   });
   let bookingsPerMonth = bookings.reduce((total, current) => {
@@ -729,30 +722,22 @@ export const fetchReservationStats = async () => {
   };
 };
 
-
- export const gennerateAI = async (
+export const gennerateAI = async (
   prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
-  
   try {
     const rawData = Object.fromEntries(formData);
-  
-    const file = formData.get('image') as File;
-    console.log(
-      "data",rawData);
-    const validatedFields = validateWithZodSchema(searchAI, rawData);
-    const validatedFile = validateWithZodSchema(imageSchema, { image: file });
-    console.log("file",validatedFile);
-    console.log(validatedFields);
-    
-    if (!validatedFields) {
-      throw new Error();
-    }
+    console.log("data", rawData);
+    const textSearch = validateWithZodSchema(textSearchAI, rawData);
+    const urlImageSearch = validateWithZodSchema(urlImageSearchAI, rawData);
+    const payload = {
+      textSearch: textSearch.search,
+      urlImageSearch: urlImageSearch.search,
+    };
+    console.log("payload", payload);
 
-   
-    
-    return { message: 'Waiting generate AI' };
+    return { message: "Waiting search AI" };
   } catch (error) {
     return renderError(error);
   }

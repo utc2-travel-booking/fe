@@ -1,8 +1,7 @@
-
-import CategoriesList from '@/components/home/CategoriesList';
-import { Suspense } from 'react';
-import LoadingCards from './loading';
-import PropertiesContainer from '@/components/home/PropertiesContainer';
+import CategoriesList from "@/components/home/CategoriesList";
+import { Suspense } from "react";
+import LoadingCards from "./loading";
+import PropertiesContainer from "@/components/home/PropertiesContainer";
 function HomePage({
   searchParams,
 }: {
