@@ -729,15 +729,22 @@ export const gennerateAI = async (
   try {
     const rawData = Object.fromEntries(formData);
     console.log("data", rawData);
-    const textSearch = validateWithZodSchema(textSearchAI, rawData);
-    const urlImageSearch = validateWithZodSchema(urlImageSearchAI, rawData);
-    const payload = {
-      textSearch: textSearch.search,
-      urlImageSearch: urlImageSearch.search,
-    };
-    console.log("payload", payload);
+    const textImg = validateWithZodSchema(textSearchAI, rawData).search;
+    const urlImg = validateWithZodSchema(urlImageSearchAI, rawData).search;
+    // const data = await fetch(
+    //   `http://localhost:5000/api/front/ais/chat?textImg=${textImg}&urlImg=${urlImg}`,
+    //   {
+    //     method: "GET",
+    //     headers: {
+    //       accept: "*/*",
+    //       Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjdhNDU5ODUzMWEzMjRiMTk4NjVlYTEiLCJuYW1lIjoiQWRtaW4iLCJlbWFpbCI6InVzZXJAZ21haWwuY29tIiwicm9sZUlkIjoiNjY3YjdiODM0NjJhMzVkMGZiZTVkMjUxIiwiaWF0IjoxNzM1MjI3NjAwLCJleHAiOjE3MzYwOTE2MDAsImlzcyI6InBsYXlncm91bmR4In0.RhXpTQxmFc24M0RlibTrlmCxFvhoqp5_Wv1ycjEPhyA`,
+    //     },
+    //   }
+    // );
+    // const result = await data.json();
 
-    return { message: "Waiting search AI" };
+    // return { message: result.data };
+    return { message: "Success" };
   } catch (error) {
     return renderError(error);
   }
